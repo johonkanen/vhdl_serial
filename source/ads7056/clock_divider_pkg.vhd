@@ -8,7 +8,7 @@ package clock_divider_pkg is
         is_ready : boolean;
         clock_counter    : natural range 0 to 7;
         number_of_clocks : natural range 0 to 63;
-        requested_number_of_clock_pulses : natural;
+        requested_number_of_clock_pulses : natural range 0 to 1023;
     end record;
 
     constant init_clock_divider : clock_divider_record := (false,0,8,7);
@@ -29,11 +29,13 @@ package clock_divider_pkg is
 ----------------------------------------------------
     function get_clock_counter ( self : clock_divider_record)
         return natural;
+----------------------------------------------------
 
 end package clock_divider_pkg;
 
 package body clock_divider_pkg is
 
+----------------------------------------------------
     function get_clock_from_divider
     (
         self : clock_divider_record

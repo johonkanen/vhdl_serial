@@ -7,7 +7,7 @@ package clock_divider_pkg is
     type clock_divider_record is record
         is_ready : boolean;
         clock_counter    : natural range 0 to 7;
-        number_of_clocks : natural range 0 to 63;
+        number_of_transmitted_clocks : natural range 0 to 1023;
         requested_number_of_clock_pulses : natural range 0 to 1023;
     end record;
 
@@ -46,7 +46,7 @@ package body clock_divider_pkg is
     begin
 
         retval := '0';
-        if self.number_of_clocks <= self.requested_number_of_clock_pulses then
+        if self.number_of_transmitted_clocks <= self.requested_number_of_clock_pulses then
             if self.clock_counter < 2 then
                 retval := '1';
             end if;
@@ -63,15 +63,15 @@ package body clock_divider_pkg is
     ) is
     begin
 
-        if self.number_of_clocks <= self.requested_number_of_clock_pulses then
+        if self.number_of_transmitted_clocks <= self.requested_number_of_clock_pulses then
             if self.clock_counter < 3 then
                 self.clock_counter <= self.clock_counter + 1;
             else
-                self.number_of_clocks <= self.number_of_clocks + 1;
+                self.number_of_transmitted_clocks <= self.number_of_transmitted_clocks + 1;
                 self.clock_counter <= 0;
             end if;
         end if;
-        self.is_ready <= (self.clock_counter = 2) and (self.number_of_clocks = self.requested_number_of_clock_pulses);
+        self.is_ready <= (self.clock_counter = 2) and (self.number_of_transmitted_clocks = self.requested_number_of_clock_pulses);
         
     end create_clock_divider;
 
@@ -83,7 +83,7 @@ package body clock_divider_pkg is
     ) is
     begin
         self.requested_number_of_clock_pulses <= number_of_clock_pulses-1;
-        self.number_of_clocks <= 0;
+        self.number_of_transmitted_clocks <= 0;
     end request_number_of_clock_pulses;
 ----------------------------------------------------
     function clock_divider_is_ready

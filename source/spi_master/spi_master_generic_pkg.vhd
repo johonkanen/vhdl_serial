@@ -18,11 +18,10 @@ package spi_master_generic_pkg is
         spi_clock               : std_logic;
         spi_cs_in               : std_logic;
         spi_data_from_master    : std_logic;
-        output_buffer           : byte;
-        output_shift_register   : std_logic_vector(15 downto 0);
+        output_shift_register   : std_logic_vector(7 downto 0);
     end record;
 
-    constant init_spi_master : spi_master_record := (init_clock_divider, 0, '0', '1', '1', (others => '0'),(others => '0'));
+    constant init_spi_master : spi_master_record := (init_clock_divider, 0, '0', '1', '1', (others => '0'));
 
 -------------------------------------------------
     procedure create_spi_master (
@@ -38,6 +37,9 @@ package spi_master_generic_pkg is
         word_to_be_sent : std_logic_vector);
 -------------------------------------------------
     function ready_to_receive_packet ( self : spi_master_record)
+        return boolean;
+-------------------------------------------------
+    function spi_is_ready ( self : spi_master_record)
         return boolean;
 -------------------------------------------------
 
@@ -98,7 +100,21 @@ package body spi_master_generic_pkg is
     return boolean
     is
     begin
-        return false;
+        return self.clock_divider.clock_counter = count_max and
+                self.clock_divider.number_of_transmitted_clocks = self.clock_divider.requested_number_of_clock_pulses-1;
     end ready_to_receive_packet;
+-------------------------------------------------
+    function spi_is_ready
+    (
+        self : spi_master_record
+    )
+    return boolean
+    is
+    begin
+
+        return clock_divider_is_ready(self.clock_divider);
+        
+    end spi_is_ready;
+    
 -------------------------------------------------
 end package body spi_master_generic_pkg;

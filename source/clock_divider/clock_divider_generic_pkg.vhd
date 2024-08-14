@@ -34,6 +34,8 @@ package clock_divider_generic_pkg is
     function get_clock_counter ( self : clock_divider_record)
         return natural;
 ----------------------------------------------------
+    function next_is_rising_edge ( self : clock_divider_record)
+        return boolean;
 
 end package clock_divider_generic_pkg;
 
@@ -90,6 +92,16 @@ package body clock_divider_generic_pkg is
         self.number_of_transmitted_clocks <= 0;
     end request_number_of_clock_pulses;
 ----------------------------------------------------
+    function get_number_of_rising_edges
+    (
+        self : clock_divider_record
+    )
+    return natural
+    is
+    begin
+        return self.number_of_transmitted_clocks ;
+    end get_number_of_rising_edges;
+----------------------------------------------------
     function clock_divider_is_ready
     (
         self : clock_divider_record
@@ -111,5 +123,15 @@ package body clock_divider_generic_pkg is
     begin
         return self.clock_counter;
     end get_clock_counter;
+----------------------------------------------------
+    function next_is_rising_edge
+    (
+        self : clock_divider_record
+    )
+    return boolean
+    is
+    begin
+        return self.clock_counter = count_max/2-1;
+    end next_is_rising_edge;
 ----------------------------------------------------
 end package body clock_divider_generic_pkg;

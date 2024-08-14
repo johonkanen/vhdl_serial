@@ -3,7 +3,6 @@ LIBRARY ieee  ;
     USE ieee.std_logic_1164.all  ; 
     use ieee.math_real.all;
 
-    use work.clock_divider_pkg.all;
 
 library vunit_lib;
 context vunit_lib.vunit_context;
@@ -13,6 +12,9 @@ entity clock_divider_tb is
 end;
 
 architecture vunit_simulation of clock_divider_tb is
+
+    package test_divider_pkg is new work.clock_divider_generic_pkg generic map(g_count_max => 31);
+    use test_divider_pkg.all;
 
     constant clock_period      : time    := 1 ns;
     constant simtime_in_clocks : integer := 5000;
@@ -24,7 +26,7 @@ architecture vunit_simulation of clock_divider_tb is
 
     signal self : clock_divider_record := init_clock_divider;
 
-    signal clock_counter    : natural range 0 to 7;
+    signal clock_counter    : natural ;
     signal number_of_clocks : natural range 0 to 63;
 
     signal ad_clock : std_logic := '1';

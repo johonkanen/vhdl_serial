@@ -36,7 +36,7 @@ begin
 
     clock_counter    <= self.clock_divider.clock_counter;
     state            <= self.state;
-    number_of_clocks <= self.clock_divider.number_of_clocks;
+    number_of_clocks <= self.clock_divider.number_of_transmitted_clocks;
 
 ------------------------------------------------------------------------
     simtime : process

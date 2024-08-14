@@ -137,9 +137,7 @@ package body spi_transmitter_generic_pkg is
     begin
         request_number_of_clock_pulses(self.clock_divider, 8);
         self.spi_cs_in <= '0';
-        /* for i in byte_to_send'range loop */
-            self.output_shift_register <= byte_to_send;
-        /* end loop; */
+        self.output_shift_register <= byte_to_send;
         
     end transmit_byte;
 -------------------------------------------------

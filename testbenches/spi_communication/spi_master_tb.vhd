@@ -1,12 +1,12 @@
 
-package spi_master_pkg is new work.spi_master_generic_pkg generic map(g_clock_divider => 11);
+package spi_transmitter_pkg is new work.spi_transmitter_generic_pkg generic map(g_clock_divider => 11);
 
 LIBRARY ieee  ; 
     USE ieee.NUMERIC_STD.all  ; 
     USE ieee.std_logic_1164.all  ; 
     use ieee.math_real.all;
 
-    use work.spi_master_pkg.all;
+    use work.spi_transmitter_pkg.all;
 
 library vunit_lib;
 context vunit_lib.vunit_context;
@@ -28,8 +28,7 @@ architecture vunit_simulation of spi_communication_tb is
 
     signal user_led : std_logic_vector(3 downto 0);
 
-    signal self : spi_master_record := init_spi_master;
-
+    signal self : spi_transmitter_record := init_spi_transmitter;
 
     signal capture_buffer : std_logic_vector(15 downto 0);
     signal packet_counter : natural := 0;
@@ -55,7 +54,7 @@ begin
         if rising_edge(simulator_clock) then
             simulation_counter <= simulation_counter + 1;
 
-            create_spi_master(self, spi_data_out);
+            create_spi_transmitter(self, spi_data_out);
 
             CASE simulation_counter is
                 WHEN 50 => 
@@ -63,13 +62,10 @@ begin
                     load_transmit_register(self, x"ac");
                 WHEN others => --do nothing
             end CASE;
-            if spi_is_ready(self) then
-                packet_counter <= packet_counter + 1;
-            end if;
 
             if ready_to_receive_packet(self) and packet_counter < 1  then
-                transmit_number_of_bytes(self,1);
                 load_transmit_register(self, x"dc");
+                transmit_number_of_bytes(self,1);
                 packet_counter <= packet_counter + 1;
             end if;
 

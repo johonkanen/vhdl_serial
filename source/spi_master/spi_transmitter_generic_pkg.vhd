@@ -2,7 +2,7 @@ library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
 
-package spi_master_generic_pkg is
+package spi_transmitter_generic_pkg is
     generic(g_clock_divider : natural);
 
     package clock_divider_pkg is new work.clock_divider_generic_pkg 
@@ -12,7 +12,7 @@ package spi_master_generic_pkg is
     subtype byte is std_logic_vector(7 downto 0);
     type bytearray is array (natural range <>) of byte;
 
-    type spi_master_record is record
+    type spi_transmitter_record is record
         clock_divider           : clock_divider_record;
         number_of_bytes_to_send : natural;
         spi_clock               : std_logic;
@@ -21,36 +21,36 @@ package spi_master_generic_pkg is
         output_shift_register   : std_logic_vector(7 downto 0);
     end record;
 
-    constant init_spi_master : spi_master_record := (init_clock_divider, 0, '0', '1', '1', (others => '0'));
+    constant init_spi_transmitter : spi_transmitter_record := (init_clock_divider, 0, '0', '1', '1', (others => '0'));
 
 -------------------------------------------------
-    procedure create_spi_master (
-        signal self : inout spi_master_record;
+    procedure create_spi_transmitter (
+        signal self : inout spi_transmitter_record;
         spi_data_slave_to_master : in std_logic);
 -------------------------------------------------
     procedure transmit_number_of_bytes (
-        signal self : inout spi_master_record;
+        signal self : inout spi_transmitter_record;
         number_of_bytes_to_send : natural);
 -------------------------------------------------
     procedure load_transmit_register (
-        signal self : inout spi_master_record;
+        signal self : inout spi_transmitter_record;
         word_to_be_sent : std_logic_vector);
 -------------------------------------------------
-    function ready_to_receive_packet ( self : spi_master_record)
+    function ready_to_receive_packet ( self : spi_transmitter_record)
         return boolean;
 -------------------------------------------------
-    function spi_is_ready ( self : spi_master_record)
+    function spi_is_ready ( self : spi_transmitter_record)
         return boolean;
 -------------------------------------------------
 
-end package spi_master_generic_pkg;
+end package spi_transmitter_generic_pkg;
 
-package body spi_master_generic_pkg is
+package body spi_transmitter_generic_pkg is
 
 -------------------------------------------------
-    procedure create_spi_master
+    procedure create_spi_transmitter
     (
-        signal self : inout spi_master_record;
+        signal self : inout spi_transmitter_record;
         spi_data_slave_to_master : in std_logic
     ) is
     begin
@@ -65,12 +65,12 @@ package body spi_master_generic_pkg is
             self.output_shift_register <= self.output_shift_register(self.output_shift_register'left-1 downto 0) & '0';
         end if;
         
-    end create_spi_master;
+    end create_spi_transmitter;
 
 -------------------------------------------------
     procedure transmit_number_of_bytes
     (
-        signal self : inout spi_master_record;
+        signal self : inout spi_transmitter_record;
         number_of_bytes_to_send : natural
     ) is
     begin
@@ -83,7 +83,7 @@ package body spi_master_generic_pkg is
 -------------------------------------------------
     procedure load_transmit_register
     (
-        signal self : inout spi_master_record;
+        signal self : inout spi_transmitter_record;
         word_to_be_sent : std_logic_vector
     ) is
     begin
@@ -95,7 +95,7 @@ package body spi_master_generic_pkg is
 -------------------------------------------------
     function ready_to_receive_packet
     (
-        self : spi_master_record
+        self : spi_transmitter_record
     )
     return boolean
     is
@@ -106,7 +106,7 @@ package body spi_master_generic_pkg is
 -------------------------------------------------
     function spi_is_ready
     (
-        self : spi_master_record
+        self : spi_transmitter_record
     )
     return boolean
     is
@@ -115,6 +115,17 @@ package body spi_master_generic_pkg is
         return clock_divider_is_ready(self.clock_divider);
         
     end spi_is_ready;
-    
 -------------------------------------------------
-end package body spi_master_generic_pkg;
+    function byte_is_ready
+    (
+        self : spi_transmitter_record
+    )
+    return boolean
+    is
+    begin
+        
+        return false;
+        
+    end byte_is_ready;
+-------------------------------------------------
+end package body spi_transmitter_generic_pkg;

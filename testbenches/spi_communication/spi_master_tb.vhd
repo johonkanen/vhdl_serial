@@ -1,12 +1,7 @@
-
-package spi_transmitter_pkg is new work.spi_transmitter_generic_pkg generic map(g_clock_divider => 11);
-
 LIBRARY ieee  ; 
     USE ieee.NUMERIC_STD.all  ; 
     USE ieee.std_logic_1164.all  ; 
     use ieee.math_real.all;
-
-    use work.spi_transmitter_pkg.all;
 
 library vunit_lib;
 context vunit_lib.vunit_context;
@@ -17,6 +12,9 @@ end;
 
 architecture vunit_simulation of spi_communication_tb is
 
+    package spi_transmitter_pkg is new work.spi_transmitter_generic_pkg generic map(g_clock_divider => 5);
+    use spi_transmitter_pkg.all;
+
     constant clock_period      : time    := 1 ns;
     constant simtime_in_clocks : integer := 5000;
     
@@ -26,12 +24,50 @@ architecture vunit_simulation of spi_communication_tb is
     -- simulation specific signals ----
     signal spi_data_out : std_logic;
 
-    signal user_led : std_logic_vector(3 downto 0);
-
     signal self : spi_transmitter_record := init_spi_transmitter;
 
     signal capture_buffer : std_logic_vector(15 downto 0);
     signal packet_counter : natural := 0;
+
+    function int_to_bytearray
+    (
+        unsigned_input : integer_vector
+    )
+    return bytearray
+    is
+        variable retval : bytearray(unsigned_input'range);
+    begin
+        for i in unsigned_input'range loop
+            retval(i) := std_logic_vector(to_unsigned(unsigned_input(i),8));
+        end loop;
+
+        return retval;
+        
+    end int_to_bytearray;
+
+    /* function reverse */
+    /* ( */
+    /*     input : bytearray */
+    /* ) */
+    /* return bytearray */
+    /* is */
+    /*     variable retval : bytearray(input'range); */
+    /* begin */
+
+    /*     for i in retval'range loop */
+    /*         for j in retval(0)'range loop */
+    /*             retval(i)(retval'high-j) := input(i)(j); */
+    /*         end loop; */
+    /*     end loop; */
+
+    /*     return retval; */
+        
+    /* end reverse; */
+
+    signal test_frame : bytearray(0 to 1) := (( 0 => x"ac", 1 => x"dc"));
+
+    /* constant wtf : std_logic_vector := x"ac"; */
+    /* signal dingdong : wtf'subtype := wtf; */
 
 begin
 
@@ -59,24 +95,26 @@ begin
             CASE simulation_counter is
                 WHEN 50 => 
                     transmit_number_of_bytes(self,1);
-                    load_transmit_register(self, x"ac");
+                    load_transmit_register(self, test_frame(0));
                 WHEN others => --do nothing
             end CASE;
 
-            if ready_to_receive_packet(self) and packet_counter < 1  then
-                load_transmit_register(self, x"dc");
+            if ready_to_receive_packet(self) and packet_counter < test_frame'high  then
                 transmit_number_of_bytes(self,1);
+                load_transmit_register(self, test_frame(1));
+                /* load_transmit_register(self, test_frame(packet_counter+1)); */
                 packet_counter <= packet_counter + 1;
             end if;
 
         end if; -- rising_edge
     end process stimulus;	
 
+--------------------------------------------------------
     catch_spi : process(self.spi_clock)
-        
     begin
         if rising_edge(self.spi_clock) then
-            capture_buffer <= capture_buffer(14 downto 0) & self.spi_data_from_master;
+            capture_buffer <= capture_buffer(capture_buffer'left-1 downto 0) & self.spi_data_from_master;
         end if; --rising_edge
     end process catch_spi;	
+--------------------------------------------------------
 end vunit_simulation;

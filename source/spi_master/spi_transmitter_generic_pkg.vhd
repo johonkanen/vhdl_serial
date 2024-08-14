@@ -42,6 +42,9 @@ package spi_transmitter_generic_pkg is
     function spi_is_ready ( self : spi_transmitter_record)
         return boolean;
 -------------------------------------------------
+    procedure transmit_byte (
+        signal self : inout spi_transmitter_record;
+        byte_to_send : byte);
 
 end package spi_transmitter_generic_pkg;
 
@@ -87,9 +90,7 @@ package body spi_transmitter_generic_pkg is
         word_to_be_sent : std_logic_vector
     ) is
     begin
-        for i in word_to_be_sent'range loop
-            self.output_shift_register(self.output_shift_register'left-i) <= word_to_be_sent(i);
-        end loop;
+        self.output_shift_register <= word_to_be_sent;
     end load_transmit_register;
 
 -------------------------------------------------
@@ -127,5 +128,19 @@ package body spi_transmitter_generic_pkg is
         return false;
         
     end byte_is_ready;
+-------------------------------------------------
+    procedure transmit_byte
+    (
+        signal self : inout spi_transmitter_record;
+        byte_to_send : byte
+    ) is
+    begin
+        request_number_of_clock_pulses(self.clock_divider, 8);
+        self.spi_cs_in <= '0';
+        /* for i in byte_to_send'range loop */
+            self.output_shift_register <= byte_to_send;
+        /* end loop; */
+        
+    end transmit_byte;
 -------------------------------------------------
 end package body spi_transmitter_generic_pkg;

@@ -50,8 +50,8 @@ package body clock_divider_generic_pkg is
     begin
 
         retval := '0';
-        if self.number_of_transmitted_clocks <= self.requested_number_of_clock_pulses then
-            if self.clock_counter <= count_max/2 then
+        if self.number_of_transmitted_clocks < self.requested_number_of_clock_pulses then
+            if self.clock_counter > count_max/2 then
                 retval := '1';
             end if;
         end if;
@@ -75,7 +75,7 @@ package body clock_divider_generic_pkg is
                 self.clock_counter <= 0;
             end if;
         end if;
-        self.is_ready <= (self.clock_counter = count_max-1) and (self.number_of_transmitted_clocks = self.requested_number_of_clock_pulses);
+        self.is_ready <= (self.clock_counter = count_max/2) and (self.number_of_transmitted_clocks = self.requested_number_of_clock_pulses);
         
     end create_clock_divider;
 
@@ -86,7 +86,7 @@ package body clock_divider_generic_pkg is
         number_of_clock_pulses : natural
     ) is
     begin
-        self.requested_number_of_clock_pulses <= number_of_clock_pulses-1;
+        self.requested_number_of_clock_pulses <= number_of_clock_pulses;
         self.number_of_transmitted_clocks <= 0;
     end request_number_of_clock_pulses;
 ----------------------------------------------------

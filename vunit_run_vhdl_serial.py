@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parent
 VU = VUnit.from_argv(compile_builtins=True, vhdl_standard="2008")
 
 lib = VU.add_library("lib")
+lib.add_source_files(ROOT / "bit_operations_pkg.vhd")
 lib.add_source_files(ROOT / "source/clock_divider/clock_divider_generic_pkg.vhd")
 lib.add_source_files(ROOT / "source/spi_master/spi_transmitter_generic_pkg.vhd")
 lib.add_source_files(ROOT / "source/ads7056/clock_divider_pkg.vhd")

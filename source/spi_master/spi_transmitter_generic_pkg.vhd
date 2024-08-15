@@ -2,6 +2,8 @@ library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
 
+    use work.bit_operations_pkg.all;
+
 package spi_transmitter_generic_pkg is
     generic(g_clock_divider : natural);
 
@@ -46,34 +48,10 @@ package spi_transmitter_generic_pkg is
         signal self : inout spi_transmitter_record;
         byte_to_send : byte);
 
-    procedure left_shift (
-        signal shift_register : inout std_logic_vector; input : in std_logic);
 
 end package spi_transmitter_generic_pkg;
 
 package body spi_transmitter_generic_pkg is
-
--------------------------------------------------
-    -- todo, move somewhere else
-    procedure left_shift
-    (
-        signal shift_register : inout std_logic_vector; input : in std_logic
-    ) is
-    begin
-
-        shift_register <= shift_register(shift_register'left-1 downto 0 ) & input;
-        
-    end left_shift;
-
-    function get_first_bit
-    (
-        input : std_logic_vector 
-    )
-    return std_logic 
-    is
-    begin
-        return input(input'left);
-    end get_first_bit;
 
 -------------------------------------------------
     procedure create_spi_transmitter

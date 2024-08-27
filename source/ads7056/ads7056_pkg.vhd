@@ -19,7 +19,7 @@ package ads7056_pkg is
         conversion_requested : boolean;
         shift_register       : std_logic_vector(17 downto 0);
         ad_conversion        : std_logic_vector(15 downto 0);
-        is_ready : boolean;
+        is_ready             : boolean;
     end record;
 
     constant init_ads7056 : ads7056_record := (init_clock_divider,init_clock_divider,4,wait_for_init, false, (others => '0'), (others => '0'), false);
@@ -89,9 +89,6 @@ package body ads7056_pkg is
 
         if self.data_capture_delay < 4 then
             self.data_capture_delay <= self.data_capture_delay + 1;
-        end if;
-
-        if self.data_capture_delay = 3 then
         end if;
 
         if self.conversion_requested then

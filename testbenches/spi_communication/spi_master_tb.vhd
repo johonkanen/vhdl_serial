@@ -45,25 +45,6 @@ architecture vunit_simulation of spi_communication_tb is
         
     end int_to_bytearray;
 
-    /* function reverse */
-    /* ( */
-    /*     input : bytearray */
-    /* ) */
-    /* return bytearray */
-    /* is */
-    /*     variable retval : bytearray(input'range); */
-    /* begin */
-
-    /*     for i in retval'range loop */
-    /*         for j in retval(0)'range loop */
-    /*             retval(i)(retval'high-j) := input(i)(j); */
-    /*         end loop; */
-    /*     end loop; */
-
-    /*     return retval; */
-        
-    /* end reverse; */
-
     signal test_frame : bytearray(0 to 1) := (( 0 => x"ac", 1 => x"dc"));
 
     /* constant wtf : std_logic_vector := x"ac"; */

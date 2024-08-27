@@ -36,7 +36,7 @@ architecture vunit_simulation of max11115_tb is
         is_ready             : boolean;
     end record;
 
-    constant init_max11115 : max11115_record := (init_clock_divider , init_clock_divider , 4 , idle , false , (others => '0') , (others => '0') , false);
+    constant init_max11115 : max11115_record := (init_clock_divider , init_clock_divider , 3 , idle , false , (others => '0') , (others => '0') , false);
 
     procedure create_max11115
     (
@@ -47,11 +47,13 @@ architecture vunit_simulation of max11115_tb is
     ) is
     begin
         
+        spi_clock_out <= get_clock_from_divider(self.clock_divider);
         create_clock_divider(self.clock_divider);
         create_clock_divider(self.data_capture_counter);
 
         self.conversion_requested <= false;
-        self.is_ready <= false;
+        self.is_ready             <= false;
+
         CASE self.state is 
             WHEN idle =>
                 if self.conversion_requested then
@@ -89,12 +91,22 @@ architecture vunit_simulation of max11115_tb is
         if get_clock_counter(self.data_capture_counter) = 3 then
             self.shift_register <= self.shift_register(self.shift_register'left-1 downto 0) & serial_io;
         end if;
+
     end create_max11115;
 
+    procedure request_conversion
+    (
+        signal self : inout max11115_record
+    ) is
+    begin
+        self.conversion_requested <= true;
+        
+    end request_conversion;
 
-    signal self : max11115_record := init_max11115;
-    signal spiclock : std_logic;
-    signal spics : std_logic;
+
+    signal self     : max11115_record := init_max11115;
+    signal spiclock : std_logic := '1';
+    signal spics    : std_logic := '1';
 
 begin
 
@@ -117,6 +129,10 @@ begin
             simulation_counter <= simulation_counter + 1;
 
             create_max11115(self,'1', spics, spiclock);
+
+            if simulation_counter = 15 then
+                request_conversion(self);
+            end if;
 
         end if; -- rising_edge
     end process stimulus;	

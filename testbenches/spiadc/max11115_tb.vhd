@@ -1,3 +1,4 @@
+----------------------------------------------
 LIBRARY ieee  ; 
     USE ieee.NUMERIC_STD.all  ; 
     USE ieee.std_logic_1164.all  ; 
@@ -47,7 +48,7 @@ architecture vunit_simulation of max11115_tb is
     ) is
     begin
         
-        spi_clock_out <= get_clock_from_divider(self.clock_divider);
+        spi_clock_out <= not get_clock_from_divider(self.clock_divider);
         create_clock_divider(self.clock_divider);
         create_clock_divider(self.data_capture_counter);
 
@@ -58,8 +59,8 @@ architecture vunit_simulation of max11115_tb is
             WHEN idle =>
                 if self.conversion_requested then
                     self.data_capture_delay <= 3;
-                    request_number_of_clock_pulses(self.clock_divider, 18);
-                    request_number_of_clock_pulses(self.data_capture_counter, 18);
+                    request_number_of_clock_pulses(self.clock_divider, 16);
+                    request_number_of_clock_pulses(self.data_capture_counter, 16);
                     self.state <= converting;
                 end if;
             WHEN converting =>
@@ -88,7 +89,7 @@ architecture vunit_simulation of max11115_tb is
             self.ad_conversion <= '0' & self.shift_register(17 downto 3);
         end if;
 
-        if get_clock_counter(self.data_capture_counter) = 3 then
+        if get_clock_counter(self.data_capture_counter) = 0 and self.state = converting then
             self.shift_register <= self.shift_register(self.shift_register'left-1 downto 0) & serial_io;
         end if;
 
@@ -130,7 +131,7 @@ begin
 
             create_max11115(self,'1', spics, spiclock);
 
-            if simulation_counter = 15 then
+            if simulation_counter = 15 or simulation_counter = 135 then
                 request_conversion(self);
             end if;
 

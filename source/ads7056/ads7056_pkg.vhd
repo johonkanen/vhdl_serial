@@ -2,10 +2,10 @@ library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
 
-package ads7056_pkg is
+package ads7056_generic_pkg is
+    generic(g_count_max : natural range 0 to 127 := 3);
 
-    package ads7056_clock_divider_pkg is new work.clock_divider_generic_pkg 
-        generic map(g_count_max => 3);
+    package ads7056_clock_divider_pkg is new work.clock_divider_generic_pkg generic map(g_count_max => g_count_max);
     use ads7056_clock_divider_pkg.all;
 
     signal ad_clock : std_logic := '1';
@@ -46,10 +46,10 @@ package ads7056_pkg is
         return std_logic_vector;
 -------------------------------------------------------------------
 
-end package ads7056_pkg;
+end package ads7056_generic_pkg;
 -------------------------------------------------------------------
 
-package body ads7056_pkg is
+package body ads7056_generic_pkg is
 
 -------------------------------------------------------------------
     procedure create_ads7056_driver
@@ -148,4 +148,10 @@ package body ads7056_pkg is
         
     end get_converted_measurement;
 
-end package body ads7056_pkg;
+end package body ads7056_generic_pkg;
+
+-------------------------------------------------------------------
+-------------------------------------------------------------------
+-- default instantiation, TODO : remove 
+
+package ads7056_pkg is new work.ads7056_generic_pkg;

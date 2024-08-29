@@ -2,9 +2,11 @@ library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
 
-    use work.clock_divider_pkg.all;
-
 package ads7056_pkg is
+
+    package ads7056_clock_divider_pkg is new work.clock_divider_generic_pkg 
+        generic map(g_count_max => 3);
+    use ads7056_clock_divider_pkg.all;
 
     signal ad_clock : std_logic := '1';
 
@@ -147,4 +149,3 @@ package body ads7056_pkg is
     end get_converted_measurement;
 
 end package body ads7056_pkg;
--------------------------------------------------------------------

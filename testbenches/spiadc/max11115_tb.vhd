@@ -1,26 +1,10 @@
-----------------------------------------------
 LIBRARY ieee  ; 
     USE ieee.NUMERIC_STD.all  ; 
     USE ieee.std_logic_1164.all  ; 
     use ieee.math_real.all;
 
-library vunit_lib;
-context vunit_lib.vunit_context;
+package max11115_pkg is
 
-entity max11115_tb is
-  generic (runner_cfg : string);
-end;
-
-architecture vunit_simulation of max11115_tb is
-
-
-    constant clock_period      : time    := 1 ns;
-    constant simtime_in_clocks : integer := 500;
-    
-    signal simulator_clock     : std_logic := '0';
-    signal simulation_counter  : natural   := 0;
-    -----------------------------------
-    -- simulation specific signals ----
     package clkdiv_pkg is new work.clock_divider_generic_pkg generic map(g_count_max => 3);
     use clkdiv_pkg.all;
 
@@ -38,6 +22,20 @@ architecture vunit_simulation of max11115_tb is
     end record;
 
     constant init_max11115 : max11115_record := (init_clock_divider , init_clock_divider , 3 , idle , false , (others => '0') , (others => '0') , false);
+
+    procedure create_max11115 (
+        signal self : inout max11115_record;
+        serial_io   : in std_logic;
+        signal cs   : out std_logic;
+        signal spi_clock_out : out std_logic);
+
+    procedure request_conversion (
+        signal self : inout max11115_record);
+
+end package max11115_pkg;
+-------------------------------------------------------
+
+package body max11115_pkg is
 
     procedure create_max11115
     (
@@ -103,6 +101,34 @@ architecture vunit_simulation of max11115_tb is
         self.conversion_requested <= true;
         
     end request_conversion;
+end package body max11115_pkg;
+
+----------------------------------------------
+LIBRARY ieee  ; 
+    USE ieee.NUMERIC_STD.all  ; 
+    USE ieee.std_logic_1164.all  ; 
+    use ieee.math_real.all;
+
+library vunit_lib;
+context vunit_lib.vunit_context;
+
+    use work.max11115_pkg.all;
+
+entity max11115_tb is
+  generic (runner_cfg : string);
+end;
+
+architecture vunit_simulation of max11115_tb is
+
+
+    constant clock_period      : time    := 1 ns;
+    constant simtime_in_clocks : integer := 500;
+    
+    signal simulator_clock     : std_logic := '0';
+    signal simulation_counter  : natural   := 0;
+    -----------------------------------
+    -- simulation specific signals ----
+
 
 
     signal self     : max11115_record := init_max11115;

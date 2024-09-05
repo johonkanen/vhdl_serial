@@ -1,28 +1,27 @@
 LIBRARY ieee  ; 
     USE ieee.NUMERIC_STD.all  ; 
     USE ieee.std_logic_1164.all  ; 
-    use ieee.math_real.all;
 
 package max11115_generic_pkg is
-    generic(g_count_max : natural range 0 to 127 := 3);
+    generic(
+            idle_state_number : natural := 0;
+            g_count_max : natural range 0 to 127 := 3);
 
     package max11115_clkdiv_pkg is new work.clock_divider_generic_pkg generic map(g_count_max => g_count_max);
     use max11115_clkdiv_pkg.all;
-
-    type spiadc_states is (idle, converting);
 
     type max11115_record is record
         clock_divider        : clock_divider_record;
         data_capture_counter : clock_divider_record;
         data_capture_delay   : natural range 0 to 7;
-        state                : spiadc_states;
+        state                : natural;
         conversion_requested : boolean;
         shift_register       : std_logic_vector(17 downto 0);
         ad_conversion        : std_logic_vector(15 downto 0);
         is_ready             : boolean;
     end record;
 
-    constant init_max11115 : max11115_record := (init_clock_divider , init_clock_divider , 3 , idle , false , (others => '0') , (others => '0') , false);
+    constant init_max11115 : max11115_record := (init_clock_divider , init_clock_divider , 3 , idle_state_number , false , (others => '0') , (others => '0') , false);
 
     ----------------------------------------------
     procedure create_max11115 (
@@ -46,6 +45,28 @@ end package max11115_generic_pkg;
 
 package body max11115_generic_pkg is
 
+    procedure create_adc_state_machine
+    (
+        signal self : inout max11115_record
+    ) is
+    begin
+        CASE self.state is 
+            WHEN 0 =>
+                if self.conversion_requested then
+                    self.data_capture_delay <= 3;
+                    request_number_of_clock_pulses(self.clock_divider, 16);
+                    request_number_of_clock_pulses(self.data_capture_counter, 16);
+                    self.state <= 1;
+                end if;
+            WHEN 1 =>
+                if clock_divider_is_ready(self.data_capture_counter) then
+                    self.state <= idle_state_number;
+                end if;
+            WHEN others =>
+        end CASE;
+        
+    end create_adc_state_machine;
+
     ----------------------------------------------
     procedure create_max11115
     (
@@ -63,19 +84,7 @@ package body max11115_generic_pkg is
         self.conversion_requested <= false;
         self.is_ready             <= false;
 
-        CASE self.state is 
-            WHEN idle =>
-                if self.conversion_requested then
-                    self.data_capture_delay <= 3;
-                    request_number_of_clock_pulses(self.clock_divider, 16);
-                    request_number_of_clock_pulses(self.data_capture_counter, 16);
-                    self.state <= converting;
-                end if;
-            WHEN converting =>
-                if clock_divider_is_ready(self.data_capture_counter) then
-                    self.state <= idle;
-                end if;
-        end CASE;
+        create_adc_state_machine(self);
 
         if self.data_capture_delay < 4 then
             self.data_capture_delay <= self.data_capture_delay + 1;
@@ -97,7 +106,7 @@ package body max11115_generic_pkg is
             self.ad_conversion <= '0' & self.shift_register(17 downto 3);
         end if;
 
-        if get_clock_counter(self.data_capture_counter) = 0 and self.state = converting then
+        if get_clock_counter(self.data_capture_counter) = 0 and self.state = 1 then
             self.shift_register <= self.shift_register(self.shift_register'left-1 downto 0) & serial_io;
         end if;
 

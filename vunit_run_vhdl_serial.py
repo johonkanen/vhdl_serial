@@ -11,6 +11,8 @@ lib = VU.add_library("lib")
 lib.add_source_files(ROOT / "bit_operations_pkg.vhd")
 lib.add_source_files(ROOT / "source/clock_divider/clock_divider_generic_pkg.vhd")
 lib.add_source_files(ROOT / "source/spi_master/spi_transmitter_generic_pkg.vhd")
+
+lib.add_source_files(ROOT / "source/spi_adc_generic/spi_adc_type_generic_pkg.vhd")
 lib.add_source_files(ROOT / "source/ads7056/ads7056_pkg.vhd")
 lib.add_source_files(ROOT / "source/max11115/max11115_generic_pkg.vhd")
 

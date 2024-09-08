@@ -1,3 +1,5 @@
+
+-----------------------------------------
 library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
@@ -17,12 +19,22 @@ package spi_adc_type_generic_pkg is
         is_ready             : boolean;
     end record;
 
-    procedure create_adc_state_machine (
-        signal self : inout spiadc_record);
 
 end spi_adc_type_generic_pkg;
 
-package body spi_adc_type_generic_pkg is
+package spi_adc_state_machine_generic_pkg is
+    generic(package spi_adc_clk_div_pkg is new work.clock_divider_generic_pkg generic map(<>);
+            package spi_adc_type_pkg is new work.spi_adc_type_generic_pkg generic map(<>));
+
+    use spi_adc_clk_div_pkg.all;
+    use spi_adc_type_pkg.all;
+
+    procedure create_adc_state_machine (
+        signal self : inout spiadc_record);
+
+end spi_adc_state_machine_generic_pkg;
+
+package body spi_adc_state_machine_generic_pkg is
 
     procedure create_adc_state_machine
     (
@@ -59,6 +71,4 @@ package body spi_adc_type_generic_pkg is
         end CASE;
     end create_adc_state_machine;
 
-end package body spi_adc_type_generic_pkg;
-
------------------------------------------
+end package body spi_adc_state_machine_generic_pkg;

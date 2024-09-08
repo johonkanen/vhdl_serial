@@ -5,15 +5,17 @@ library ieee;
 package ads7056_generic_pkg is
     generic(
             idle_state_number : natural := 0;
-            package ads7056_clock_divider_pkg is new work.clock_divider_generic_pkg generic map(<>);
-            package ads7056_type_pkg          is new work.spi_adc_type_generic_pkg generic map(<>)
+            package ads7056_clock_divider_pkg is new work.clock_divider_generic_pkg         generic map (<>);
+            package ads7056_type_pkg          is new work.spi_adc_type_generic_pkg          generic map (<>);
+            package ads7056_state_machine_pkg is new work.spi_adc_state_machine_generic_pkg generic map (<>)
         );
     use ads7056_clock_divider_pkg.all;
     use ads7056_type_pkg.all;
+    use ads7056_state_machine_pkg.all;
 
 -------------------------------------------------------------------
     alias ads7056_record is ads7056_type_pkg.spiadc_record;
-    constant init_ads7056 : ads7056_record := (init_clock_divider,init_clock_divider,4, idle_state_number, false, (others => '0'), (others => '0'), false);
+    constant init_ads7056 : ads7056_record := (init_clock_divider , init_clock_divider , 4 , idle_state_number , false , (others => '0') , (others => '0') , false);
 
 -------------------------------------------------------------------
     procedure create_ads7056_driver (
@@ -125,9 +127,15 @@ end package body ads7056_generic_pkg;
 -- default instantiation, TODO : remove 
 
 package test_clock_divider_pkg is new work.clock_divider_generic_pkg generic map(g_count_max => 3);
-package test_ads7056_type_pkg is new work.spi_adc_type_generic_pkg generic map(work.test_clock_divider_pkg);
+package test_ads7056_type_pkg  is new work.spi_adc_type_generic_pkg generic map(work.test_clock_divider_pkg);
+package spi_adc_state_machine_pkg is new work.spi_adc_state_machine_generic_pkg generic map(
+    work.test_clock_divider_pkg,
+    work.test_ads7056_type_pkg );
 
 package ads7056_pkg is new work.ads7056_generic_pkg 
     generic map(
-            ads7056_clock_divider_pkg => work.test_clock_divider_pkg,
-            ads7056_type_pkg          => work.test_ads7056_type_pkg);
+            ads7056_clock_divider_pkg => work.test_clock_divider_pkg ,
+            ads7056_type_pkg          => work.test_ads7056_type_pkg  ,
+            ads7056_state_machine_pkg => work.spi_adc_state_machine_pkg
+        );
+-------------------------------------------------------------------

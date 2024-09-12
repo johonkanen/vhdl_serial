@@ -19,9 +19,11 @@ package spi_adc_type_generic_pkg is
         is_ready             : boolean;
     end record;
 
+    constant init_spiadc : spiadc_record := (init_clock_divider , init_clock_divider , 4 , 0 , false , (others => '0') , (others => '0') , false);
 
 end spi_adc_type_generic_pkg;
 
+--------------------------------------------
 package spi_adc_state_machine_generic_pkg is
     generic(package spi_adc_clk_div_pkg is new work.clock_divider_generic_pkg generic map(<>);
             package spi_adc_type_pkg is new work.spi_adc_type_generic_pkg generic map(<>));

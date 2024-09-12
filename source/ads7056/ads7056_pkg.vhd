@@ -15,7 +15,8 @@ package ads7056_generic_pkg is
 
 -------------------------------------------------------------------
     alias ads7056_record is ads7056_type_pkg.spiadc_record;
-    constant init_ads7056 : ads7056_record := (init_clock_divider , init_clock_divider , 4 , idle_state_number , false , (others => '0') , (others => '0') , false);
+
+    constant init_ads7056 : ads7056_record := init_spiadc;
 
 -------------------------------------------------------------------
     procedure create_ads7056_driver (

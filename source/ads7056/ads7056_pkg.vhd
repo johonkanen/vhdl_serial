@@ -52,6 +52,10 @@ package body ads7056_generic_pkg is
         signal cs            : out std_logic;
         signal spi_clock_out : out std_logic
     ) is
+        constant wait_for_init : natural := 0;
+        constant initializing  : natural := 1;
+        constant ready         : natural := 2;
+        constant converting    : natural := 3;
     begin
         spi_clock_out <= get_clock_from_divider(self.clock_divider);
         create_clock_divider(self.clock_divider);
@@ -60,7 +64,29 @@ package body ads7056_generic_pkg is
         self.conversion_requested <= false;
         self.is_ready <= false;
 
-        create_adc_state_machine(self);
+        CASE self.state is 
+            WHEN wait_for_init =>
+                if self.conversion_requested then
+                    request_number_of_clock_pulses(self.clock_divider, 24);
+                    self.state <= 1;
+                end if;
+            WHEN initializing  =>
+                if clock_divider_is_ready(self.clock_divider) then
+                    self.state <= 2;
+                end if;
+            WHEN ready =>
+                if self.conversion_requested then
+                    self.data_capture_delay <= 3;
+                    request_number_of_clock_pulses(self.clock_divider, 18);
+                    request_number_of_clock_pulses(self.data_capture_counter, 18);
+                    self.state <= 3;
+                end if;
+            WHEN converting =>
+                if clock_divider_is_ready(self.data_capture_counter) then
+                    self.state <= 2;
+                end if;
+            WHEN others => -- do nothing
+        end CASE;
 
         if self.data_capture_delay < 4 then
             self.data_capture_delay <= self.data_capture_delay + 1;

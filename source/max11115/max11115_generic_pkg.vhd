@@ -53,9 +53,8 @@ package body max11115_generic_pkg is
         CASE self.state is 
             WHEN 0 =>
                 if self.conversion_requested then
-                    self.data_capture_delay <= 3;
+                    self.data_capture_delay <= 2;
                     request_number_of_clock_pulses(self.clock_divider, 16);
-                    request_number_of_clock_pulses(self.data_capture_counter, 16);
                     self.state <= 1;
                 end if;
             WHEN 1 =>
@@ -89,6 +88,9 @@ package body max11115_generic_pkg is
         if self.data_capture_delay < 4 then
             self.data_capture_delay <= self.data_capture_delay + 1;
         end if;
+        if self.data_capture_delay = 3 then
+            request_number_of_clock_pulses(self.data_capture_counter, 16);
+        end if;
 
         if self.conversion_requested then
             cs <= '0';
@@ -106,7 +108,7 @@ package body max11115_generic_pkg is
             self.ad_conversion <= '0' & self.shift_register(17 downto 3);
         end if;
 
-        if get_clock_counter(self.data_capture_counter) = 0 and self.state = 1 then
+        if get_clock_counter(self.data_capture_counter) = 1 and self.state = 1 then
             self.shift_register <= self.shift_register(self.shift_register'left-1 downto 0) & serial_io;
         end if;
 

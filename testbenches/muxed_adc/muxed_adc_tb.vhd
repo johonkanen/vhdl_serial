@@ -23,18 +23,67 @@ LIBRARY ieee  ;
 
 entity muxed_adc is
     port(
-            clock   : in std_logic
-             ; mux_io : out std_logic_vector(2 downto 0)
-             ; adbus  : out adbus_record
-             ; measurement_requested : in  boolean
+            clock      : in std_logic
+            ; ad_clock : out std_logic 
+            ; ad_data  : in std_logic
+            ; cs       : out std_logic
+            ; mux_io   : out std_logic_vector(2 downto 0)
+            ; adbus    : out adbus_record
+            ; measurement_requested : in  boolean
+
         );
 end;
 
 architecture rtl of muxed_adc is
 
     use work.ads7056_pkg.all;
+    signal self : ads7056_record := init_ads7056;
+
+
+    signal mux_state      : natural range 0 to 7 := 0;
+    signal next_mux_state : natural range 0 to 7 := 0;
+
+    --------------------------
+    function to_std_vector(vector_length : positive ; number : natural) return std_logic_vector is
+    begin
+        return std_logic_vector(to_unsigned(number, vector_length));
+    end to_std_vector;
+    --------------------------
 
 begin
+    mux_io <= to_std_vector(3, mux_state);
+
+    process(clock) is
+    begin
+        if rising_edge(clock) then
+            --------------------
+            create_ads7056_driver(self , ad_data , cs , ad_clock);
+            if measurement_requested then
+                request_conversion(self);
+            end if;
+            --------------------
+
+            --------------------
+            if ad_conversion_is_ready(self) then
+                if mux_state < 7 then
+                    mux_state <= mux_state + 1;
+                else
+                    mux_state <= 0;
+                end if;
+            end if;
+            --------------------
+
+            --------------------
+            adbus.measurement_is_ready <= false;
+            if ad_conversion_is_ready(self) then
+                adbus.measurement_is_ready   <= true;
+                adbus.ad_measurement         <= get_converted_measurement(self);
+                adbus.mux_pos_of_measurement <= mux_state;
+            end if;
+            --------------------
+        end if;
+    end process;
+
 
 end rtl;
 ----------------------------------
@@ -69,33 +118,15 @@ architecture vunit_simulation of muxed_adc_tb is
     signal clock_counter    : natural range 0 to 7;
     signal number_of_clocks : natural range 0 to 63;
 
-    signal self : ads7056_record := init_ads7056;
-
     signal ad_clock : std_logic;
     signal ad_data : std_logic := '1';
     signal cs : std_logic;
-
-    signal mux_io         : std_logic_vector(2 downto 0);
-    signal mux_state      : natural range 0 to 7 := 0;
-    signal next_mux_state : natural range 0 to 7 := 0;
-
+    signal mux_io : std_logic_vector(2 downto 0);
 
     signal adbus : adbus_record := init_adbus;
     signal measurement_requested : boolean := false;
 
-    --------------------------
-    function to_std_vector(vector_ref : std_logic_vector ; number : natural) return std_logic_vector is
-    begin
-        return std_logic_vector(to_unsigned(number, vector_ref'length));
-    end to_std_vector;
-    --------------------------
-
 begin
-
-    mux_io <= to_std_vector(mux_io, mux_state);
-
-    clock_counter    <= self.clock_divider.clock_counter;
-    number_of_clocks <= self.clock_divider.number_of_transmitted_clocks;
 
 ------------------------------------------------------------------------
     simtime : process
@@ -122,41 +153,20 @@ begin
                     end if;
             end CASE; --simulation_counter
 
-            --------------------
-            create_ads7056_driver(self , ad_data , cs , ad_clock);
-            if measurement_requested then
-                request_conversion(self);
-            end if;
-            --------------------
-
-            --------------------
-            if ad_conversion_is_ready(self) then
-                if mux_state < 7 then
-                    mux_state <= mux_state + 1;
-                else
-                    mux_state <= 0;
-                end if;
-            end if;
-            --------------------
-
-            --------------------
-            adbus.measurement_is_ready <= false;
-            if ad_conversion_is_ready(self) then
-                adbus.measurement_is_ready   <= true;
-                adbus.ad_measurement         <= get_converted_measurement(self);
-                adbus.mux_pos_of_measurement <= mux_state;
-            end if;
-            --------------------
-
         end if; -- rising_edge
     end process stimulus;	
 
+    ad_data <= '1';
+
     u_muxed_adc : entity work.muxed_adc
     port map(
-            clock => simulator_clock
-            , mux_io => open
-            , adbus => open
-            , measurement_requested => measurement_requested
+             simulator_clock
+             , ad_clock
+             , ad_data
+             , cs
+             , mux_io => mux_io
+             , adbus => adbus
+             , measurement_requested => measurement_requested
         );
 ------------------------------------------------------------------------
 end vunit_simulation;

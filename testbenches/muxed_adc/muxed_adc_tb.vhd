@@ -58,8 +58,9 @@ entity muxed_adc is
             ; cs       : out std_logic
             ; mux_io   : out std_logic_vector(2 downto 0)
             ; adbus    : out adbus_record
-            ; measurement_requested : in  boolean
-
+            ; measurement_requested : in boolean
+            ; requested_next_mux_pos : in natural := 0
+            ; sample_and_hold_ready : out boolean := false
         );
 end;
 
@@ -69,8 +70,10 @@ architecture rtl of muxed_adc is
     signal self : ads7056_record := init_ads7056;
 
 
-    signal mux_state      : natural range 0 to 7 := 0;
-    signal next_mux_state : natural range 0 to 7 := 0;
+    signal current_mux_state : natural range 0 to 7 := 0;
+    signal converted_mux_state    : natural range 0 to 7 := 0;
+
+    signal sample_and_hold_counter : natural range 0 to 4095 := 100;
 
     --------------------------
     function to_std_vector(vector_length : positive ; number : natural) return std_logic_vector is
@@ -80,36 +83,38 @@ architecture rtl of muxed_adc is
     --------------------------
 
 begin
-    mux_io <= to_std_vector(3, mux_state);
+
+    sample_and_hold_ready <= sample_and_hold_counter = 99;
 
     process(clock) is
     begin
         if rising_edge(clock) then
             --------------------
             create_ads7056_driver(self , ad_data , cs , ad_clock);
+            --------------------
             if measurement_requested then
                 request_conversion(self);
+                sample_and_hold_counter <= 0;
             end if;
             --------------------
-
-            --------------------
-            if ad_conversion_is_ready(self) then
-                if mux_state < 7 then
-                    mux_state <= mux_state + 1;
-                else
-                    mux_state <= 0;
-                end if;
+            if sample_and_hold_counter < 100 then
+                sample_and_hold_counter <= sample_and_hold_counter + 1;
             end if;
-            --------------------
 
+            if sample_and_hold_counter = 99 then
+                mux_io              <= to_std_vector(3, requested_next_mux_pos);
+                current_mux_state   <= requested_next_mux_pos;
+                converted_mux_state <= current_mux_state;
+            end if;
             --------------------
             adbus.measurement_is_ready <= false;
             if ad_conversion_is_ready(self) then
                 adbus.measurement_is_ready   <= true;
                 adbus.ad_measurement         <= get_converted_measurement(self);
-                adbus.mux_pos_of_measurement <= mux_state;
+                adbus.mux_pos_of_measurement <= converted_mux_state;
             end if;
             --------------------
+
         end if;
     end process;
 

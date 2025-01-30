@@ -3,6 +3,7 @@ LIBRARY ieee  ;
     USE ieee.std_logic_1164.all  ; 
 
 package muxed_adc_pkg is
+    ----------------------------------
     type adbus_record is record
         mux_pos_of_measurement : natural range 0 to 7;
         ad_measurement       : std_logic_vector(15 downto 0);
@@ -58,18 +59,22 @@ entity muxed_adc is
             ; ad_data  : in std_logic
             ; cs       : out std_logic
             ; mux_io   : out std_logic_vector(2 downto 0)
+
             ; adbus    : out adbus_record
-            ; measurement_requested : in boolean
-            ; requested_next_mux_pos : in natural := 0
-            ; sample_and_hold_ready : out boolean := false
+
+            ; measurement_requested  : in boolean
+            ; requested_next_mux_pos : in natural  := 0
+            ; sample_and_hold_ready  : out boolean := false
         );
 end;
 
 architecture rtl of muxed_adc is
 
     use work.ads7056_pkg.all;
-    signal self : ads7056_record := init_ads7056;
+    package max11115_pkg is new work.max11115_generic_pkg;
+        use max11115_pkg.all;
 
+    signal self : max11115_record := init_max11115;
 
     signal current_mux_state : natural range 0 to 7 := 0;
     signal converted_mux_state    : natural range 0 to 7 := 0;
@@ -91,7 +96,7 @@ begin
     begin
         if rising_edge(clock) then
             --------------------
-            create_ads7056_driver(self , ad_data , cs , ad_clock);
+            create_max11115(self , ad_data , cs , ad_clock);
             --------------------
             if measurement_requested then
                 request_conversion(self);

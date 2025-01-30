@@ -5,16 +5,45 @@ LIBRARY ieee  ;
 package muxed_adc_pkg is
     type adbus_record is record
         mux_pos_of_measurement : natural range 0 to 7;
-        ad_measurement : std_logic_vector(15 downto 0);
+        ad_measurement       : std_logic_vector(15 downto 0);
         measurement_is_ready : boolean;
     end record adbus_record;
 
     constant init_adbus : adbus_record := (0, (others => '0'), false);
 
+    ----------------------------------
+    function measurement_is_ready(adbus : adbus_record) return boolean;
+    ----------------------------------
+    function get_measurement(adbus : adbus_record) return std_logic_vector;
+    ----------------------------------
+    function get_mux_pos_of_measurement(adbus : adbus_record) return natural;
+    ----------------------------------
+
 end package muxed_adc_pkg ;
 
 ----------------------------------
+package body muxed_adc_pkg is
 
+    ----------------------------------
+    function measurement_is_ready(adbus : adbus_record) return boolean is
+    begin
+        return adbus.measurement_is_ready;
+    end measurement_is_ready;
+    ----------------------------------
+    function get_measurement(adbus : adbus_record) return std_logic_vector is
+    begin
+        return adbus.ad_measurement;
+    end get_measurement;
+    ----------------------------------
+    function get_mux_pos_of_measurement(adbus : adbus_record) return natural is
+    begin
+        return adbus.mux_pos_of_measurement;
+    end get_mux_pos_of_measurement;
+    ----------------------------------
+
+
+end package body muxed_adc_pkg ;
+----------------------------------
 LIBRARY ieee  ; 
     USE ieee.NUMERIC_STD.all  ; 
     USE ieee.std_logic_1164.all  ; 

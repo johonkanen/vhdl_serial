@@ -70,7 +70,6 @@ end;
 
 architecture rtl of muxed_adc is
 
-    use work.ads7056_pkg.all;
     package max11115_pkg is new work.max11115_generic_pkg;
         use max11115_pkg.all;
 

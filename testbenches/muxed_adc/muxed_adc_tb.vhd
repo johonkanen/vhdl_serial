@@ -13,7 +13,6 @@ end;
 
 architecture vunit_simulation of muxed_adc_tb is
 
-    use work.ads7056_pkg.all;
     use work.muxed_adc_pkg.all;
 
     constant clock_period      : time    := 1 ns;

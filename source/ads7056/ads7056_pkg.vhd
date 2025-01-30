@@ -28,14 +28,15 @@ package ads7056_generic_pkg is
 -------------------------------------------------------------------
     procedure request_conversion (
         signal self : inout ads7056_record);
-
 -------------------------------------------------------------------
     function ad_conversion_is_ready ( self : ads7056_record)
         return boolean;
-
 -------------------------------------------------------------------
     function get_converted_measurement ( self : ads7056_record)
         return std_logic_vector;
+-------------------------------------------------------------------
+    function sample_and_hold_ready ( self : ads7056_record)
+        return boolean;
 -------------------------------------------------------------------
 
 end package ads7056_generic_pkg;
@@ -146,6 +147,16 @@ package body ads7056_generic_pkg is
         return self.ad_conversion;
         
     end get_converted_measurement;
+-------------------------------------------------------------------
+    function sample_and_hold_ready
+    (
+        self : ads7056_record
+    )
+    return boolean is
+    begin
+        return false;
+    end sample_and_hold_ready;
+-------------------------------------------------------------------
 
 end package body ads7056_generic_pkg;
 
@@ -161,8 +172,7 @@ package spi_adc_state_machine_pkg is new work.spi_adc_state_machine_generic_pkg 
 
 package ads7056_pkg is new work.ads7056_generic_pkg 
     generic map(
-            ads7056_clock_divider_pkg => work.test_clock_divider_pkg ,
-            ads7056_type_pkg          => work.test_ads7056_type_pkg  ,
-            ads7056_state_machine_pkg => work.spi_adc_state_machine_pkg
-        );
+            ads7056_clock_divider_pkg => work.test_clock_divider_pkg 
+             , ads7056_type_pkg          => work.test_ads7056_type_pkg
+             , ads7056_state_machine_pkg => work.spi_adc_state_machine_pkg);
 -------------------------------------------------------------------

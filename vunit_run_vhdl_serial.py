@@ -19,6 +19,9 @@ lib.add_source_files(ROOT / "source/max11115/max11115_generic_pkg.vhd")
 lib.add_source_files(ROOT / "testbenches/iic/iic_dac_tb.vhd")
 lib.add_source_files(ROOT / "testbenches/spiadc/clock_divider_tb.vhd")
 lib.add_source_files(ROOT / "testbenches/spiadc/ads7056_tb.vhd")
+
+lib.add_source_files(ROOT / "testbenches/muxed_adc/muxed_adc_tb.vhd")
+
 lib.add_source_files(ROOT / "testbenches/spiadc/max11115_tb.vhd")
 
 lib.add_source_files(ROOT / "testbenches/spi_communication/spi_master_tb.vhd")

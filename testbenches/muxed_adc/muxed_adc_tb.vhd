@@ -22,13 +22,11 @@ LIBRARY ieee  ;
     use work.muxed_adc_pkg.all;
 
 entity muxed_adc is
-    generic(
-            package adc_package is new work.ads7056_generic_pkg generic map (<>)
-           );
     port(
             clock   : in std_logic
-            ;mux_io : out std_logic_vector(2 downto 0)
-            ;adbus  : out adbus_record
+             ; mux_io : out std_logic_vector(2 downto 0)
+             ; adbus  : out adbus_record
+             ; measurement_requested : in  boolean
         );
 end;
 
@@ -152,5 +150,13 @@ begin
 
         end if; -- rising_edge
     end process stimulus;	
+
+    u_muxed_adc : entity work.muxed_adc
+    port map(
+            clock => simulator_clock
+            , mux_io => open
+            , adbus => open
+            , measurement_requested => measurement_requested
+        );
 ------------------------------------------------------------------------
 end vunit_simulation;

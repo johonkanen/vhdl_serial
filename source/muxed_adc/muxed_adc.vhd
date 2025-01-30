@@ -51,6 +51,7 @@ LIBRARY ieee  ;
     use work.muxed_adc_pkg.all;
 
 entity muxed_adc is
+    generic(g_sample_and_hold_delay_in_clocks : natural := 100);
     port(
             clock      : in std_logic
             ; ad_clock : out std_logic 
@@ -73,7 +74,7 @@ architecture rtl of muxed_adc is
     signal current_mux_state : natural range 0 to 7 := 0;
     signal converted_mux_state    : natural range 0 to 7 := 0;
 
-    signal sample_and_hold_counter : natural range 0 to 4095 := 100;
+    signal sample_and_hold_counter : natural range 0 to g_sample_and_hold_delay_in_clocks := g_sample_and_hold_delay_in_clocks;
 
     --------------------------
     function to_std_vector(vector_length : positive ; number : natural) return std_logic_vector is
@@ -84,7 +85,7 @@ architecture rtl of muxed_adc is
 
 begin
 
-    sample_and_hold_ready <= sample_and_hold_counter = 99;
+    sample_and_hold_ready <= sample_and_hold_counter = (g_sample_and_hold_delay_in_clocks-1);
 
     process(clock) is
     begin
@@ -97,11 +98,11 @@ begin
                 sample_and_hold_counter <= 0;
             end if;
             --------------------
-            if sample_and_hold_counter < 100 then
+            if sample_and_hold_counter < g_sample_and_hold_delay_in_clocks then
                 sample_and_hold_counter <= sample_and_hold_counter + 1;
             end if;
 
-            if sample_and_hold_counter = 99 then
+            if sample_and_hold_counter = (g_sample_and_hold_delay_in_clocks-1) then
                 mux_io              <= to_std_vector(3, requested_next_mux_pos);
                 current_mux_state   <= requested_next_mux_pos;
                 converted_mux_state <= current_mux_state;

@@ -32,7 +32,13 @@ entity muxed_adc is
         );
 end;
 
-        
+architecture rtl of muxed_adc is
+
+    use work.ads7056_pkg.all;
+
+begin
+
+end rtl;
 ----------------------------------
 
 
@@ -41,8 +47,6 @@ LIBRARY ieee  ;
     USE ieee.std_logic_1164.all  ; 
     use ieee.math_real.all;
 
-    use work.ads7056_pkg.all;
-    use work.muxed_adc_pkg.all;
 
 library vunit_lib;
 context vunit_lib.vunit_context;
@@ -52,6 +56,9 @@ entity muxed_adc_tb is
 end;
 
 architecture vunit_simulation of muxed_adc_tb is
+
+    use work.ads7056_pkg.all;
+    use work.muxed_adc_pkg.all;
 
     constant clock_period      : time    := 1 ns;
     constant simtime_in_clocks : integer := 5000;

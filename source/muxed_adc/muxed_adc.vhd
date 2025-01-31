@@ -1,8 +1,16 @@
+-- LIBRARY ieee  ; 
+--     USE ieee.NUMERIC_STD.all  ; 
+--     USE ieee.std_logic_1164.all  ; 
+--
+-- package adbus_pkg is
+-- end package adbus_pkg;
+
 LIBRARY ieee  ; 
     USE ieee.NUMERIC_STD.all  ; 
     USE ieee.std_logic_1164.all  ; 
 
 package muxed_adc_pkg is
+    ----------------------------------
     ----------------------------------
     -- TODO move to own package
     type adbus_record is record
@@ -10,16 +18,6 @@ package muxed_adc_pkg is
         ad_measurement         : std_logic_vector(15 downto 0);
         measurement_is_ready   : boolean;
     end record adbus_record;
-
-    type muxed_adc_in_record is record
-        measurement_requested  : boolean;
-        requested_next_mux_pos : natural;
-    end record;
-
-    type muxed_adc_out_record is record
-        adbus : adbus_record;
-        sample_and_hold_ready : boolean;
-    end record;
 
     constant init_adbus : adbus_record := (0, (others => '0'), false);
 
@@ -34,6 +32,18 @@ package muxed_adc_pkg is
     ----------------------------------
     function get_mux_pos_of_measurement(adbus : adbus_record) return natural;
     ----------------------------------
+
+    ----------------------------------
+    type muxed_adc_in_record is record
+        measurement_requested  : boolean;
+        requested_next_mux_pos : natural;
+    end record;
+
+    type muxed_adc_out_record is record
+        adbus : adbus_record;
+        sample_and_hold_ready : boolean;
+    end record;
+
 
 end package muxed_adc_pkg ;
 

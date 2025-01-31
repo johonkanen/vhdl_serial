@@ -73,8 +73,9 @@ begin
              , ad_data
              , cs
              , mux_io => mux_io
-             , adbus => adbus
-             , measurement_requested => measurement_requested
+             , muxed_adc_in.measurement_requested => measurement_requested
+             , muxed_adc_in.requested_next_mux_pos => 0
+             , muxed_adc_out.adbus => adbus
         );
 ------------------------------------------------------------------------
 end vunit_simulation;

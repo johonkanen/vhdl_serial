@@ -4,18 +4,33 @@ LIBRARY ieee  ;
 
 package muxed_adc_pkg is
     ----------------------------------
+    -- TODO move to own package
     type adbus_record is record
         mux_pos_of_measurement : natural range 0 to 7;
-        ad_measurement       : std_logic_vector(15 downto 0);
-        measurement_is_ready : boolean;
+        ad_measurement         : std_logic_vector(15 downto 0);
+        measurement_is_ready   : boolean;
     end record adbus_record;
+
+    type muxed_adc_in_record is record
+        measurement_requested  : boolean;
+        requested_next_mux_pos : natural;
+    end record;
+
+    type muxed_adc_out_record is record
+        adbus : adbus_record;
+        sample_and_hold_ready : boolean;
+    end record;
 
     constant init_adbus : adbus_record := (0, (others => '0'), false);
 
     ----------------------------------
     function measurement_is_ready(adbus : adbus_record) return boolean;
     ----------------------------------
-    function get_measurement(adbus : adbus_record) return std_logic_vector;
+    function get_measurement(adbus : adbus_record) return 
+        std_logic_vector;
+    -----
+    function get_measurement(adbus : adbus_record) return 
+        natural;
     ----------------------------------
     function get_mux_pos_of_measurement(adbus : adbus_record) return natural;
     ----------------------------------
@@ -34,6 +49,11 @@ package body muxed_adc_pkg is
     function get_measurement(adbus : adbus_record) return std_logic_vector is
     begin
         return adbus.ad_measurement;
+    end get_measurement;
+    ----------
+    function get_measurement(adbus : adbus_record) return natural is
+    begin
+        return to_integer(unsigned(adbus.ad_measurement));
     end get_measurement;
     ----------------------------------
     function get_mux_pos_of_measurement(adbus : adbus_record) return natural is
@@ -60,11 +80,8 @@ entity muxed_adc is
             ; cs       : out std_logic
             ; mux_io   : out std_logic_vector(2 downto 0)
 
-            ; adbus    : out adbus_record
-
-            ; measurement_requested  : in boolean
-            ; requested_next_mux_pos : in natural  := 0
-            ; sample_and_hold_ready  : out boolean := false
+            ; muxed_adc_in  : in muxed_adc_in_record
+            ; muxed_adc_out : out muxed_adc_out_record
         );
 end;
 
@@ -89,7 +106,7 @@ architecture rtl of muxed_adc is
 
 begin
 
-    sample_and_hold_ready <= sample_and_hold_counter = (g_sample_and_hold_delay_in_clocks-1);
+    muxed_adc_out.sample_and_hold_ready <= sample_and_hold_counter = (g_sample_and_hold_delay_in_clocks-1);
 
     process(clock) is
     begin
@@ -97,7 +114,7 @@ begin
             --------------------
             create_max11115(self , ad_data , cs , ad_clock);
             --------------------
-            if measurement_requested then
+            if muxed_adc_in.measurement_requested then
                 request_conversion(self);
                 sample_and_hold_counter <= 0;
             end if;
@@ -107,16 +124,16 @@ begin
             end if;
 
             if sample_and_hold_counter = (g_sample_and_hold_delay_in_clocks-1) then
-                mux_io              <= to_std_vector(3, requested_next_mux_pos);
-                current_mux_state   <= requested_next_mux_pos;
+                mux_io              <= to_std_vector(3, muxed_adc_in.requested_next_mux_pos);
+                current_mux_state   <= muxed_adc_in.requested_next_mux_pos;
                 converted_mux_state <= current_mux_state;
             end if;
             --------------------
-            adbus.measurement_is_ready <= false;
+            muxed_adc_out.adbus.measurement_is_ready <= false;
             if ad_conversion_is_ready(self) then
-                adbus.measurement_is_ready   <= true;
-                adbus.ad_measurement         <= get_converted_measurement(self);
-                adbus.mux_pos_of_measurement <= converted_mux_state;
+                muxed_adc_out.adbus.measurement_is_ready   <= true;
+                muxed_adc_out.adbus.ad_measurement         <= get_converted_measurement(self);
+                muxed_adc_out.adbus.mux_pos_of_measurement <= converted_mux_state;
             end if;
             --------------------
 

@@ -106,7 +106,7 @@ package body ads7056_generic_pkg is
         end if;
 
         if self.is_ready then
-            self.ad_conversion <= '0' & self.shift_register(17 downto 3);
+            self.ad_conversion <= '0' & self.shift_register(16 downto 2);
         end if;
 
         if get_clock_counter(self.data_capture_counter) = 3 then

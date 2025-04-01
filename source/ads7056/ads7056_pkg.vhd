@@ -14,7 +14,7 @@ package ads7056_generic_pkg is
     use ads7056_state_machine_pkg.all;
 
 -------------------------------------------------------------------
-    alias ads7056_record is ads7056_type_pkg.spiadc_record;
+    subtype ads7056_record is ads7056_type_pkg.spiadc_record;
 
     constant init_ads7056 : ads7056_record := init_spiadc;
 

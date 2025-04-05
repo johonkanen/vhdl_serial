@@ -31,7 +31,7 @@ package max11115_generic_pkg is
         serial_io   : in std_logic;
         signal cs   : out std_logic;
         signal spi_clock_out : out std_logic
-        ;offset : in natural := 3);
+        ;offset : in natural := g_buffer_offset);
 
     ----------------------------------------------
     procedure request_conversion (

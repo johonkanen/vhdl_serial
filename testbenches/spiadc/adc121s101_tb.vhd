@@ -19,6 +19,12 @@ architecture vunit_simulation of adc121s101_tb is
     signal simulation_counter  : natural   := 0;
     -----------------------------------
     -- simulation specific signals ----
+    package max11115_pkg is new work.max11115_generic_pkg generic map(g_count_max => 7);
+    use max11115_pkg.all;
+
+    signal self     : max11115_record := init_max11115;
+    signal spiclock : std_logic := '1';
+    signal spics    : std_logic := '1';
 
 begin
 
@@ -39,6 +45,12 @@ begin
     begin
         if rising_edge(simulator_clock) then
             simulation_counter <= simulation_counter + 1;
+
+            create_max11115(self,'1', spics, spiclock);
+
+            if simulation_counter = 15 or simulation_counter = 135 then
+                request_conversion(self);
+            end if;
 
         end if; -- rising_edge
     end process stimulus;	

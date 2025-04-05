@@ -4,8 +4,10 @@ LIBRARY ieee  ;
 
 package max11115_generic_pkg is
     generic(
-            idle_state_number : natural := 0;
-            g_count_max : natural range 0 to 127 := 3);
+            idle_state_number : natural := 0
+            ;g_count_max : natural range 0 to 127 := 3
+            ;g_buffer_offset : natural range 0 to 15 := 3
+        );
 
     package max11115_clkdiv_pkg is new work.clock_divider_generic_pkg generic map(g_count_max => g_count_max);
     use max11115_clkdiv_pkg.all;
@@ -28,7 +30,8 @@ package max11115_generic_pkg is
         signal self : inout max11115_record;
         serial_io   : in std_logic;
         signal cs   : out std_logic;
-        signal spi_clock_out : out std_logic);
+        signal spi_clock_out : out std_logic
+        ;offset : in natural := 3);
 
     ----------------------------------------------
     procedure request_conversion (
@@ -67,12 +70,28 @@ package body max11115_generic_pkg is
     end create_adc_state_machine;
 
     ----------------------------------------------
+    function fetch_adc(shift_register : std_logic_vector; offset : natural) return std_logic_vector is
+        variable retval : std_logic_vector(15 downto 0) := (others => '0');
+    begin
+
+        for i in 0 to 15 loop
+            if (i + offset) <= shift_register'high
+            then
+                retval(i) := shift_register(i+offset);
+            end if;
+        end loop;
+
+        return retval;
+
+    end fetch_adc;
+    ----------------------------------------------
     procedure create_max11115
     (
-        signal self : inout max11115_record;
-        serial_io   : in std_logic;
-        signal cs   : out std_logic;
-        signal spi_clock_out : out std_logic
+        signal self : inout max11115_record
+        ;serial_io   : in std_logic
+        ;signal cs   : out std_logic
+        ;signal spi_clock_out : out std_logic
+        ;offset : in natural := g_buffer_offset
     ) is
     begin
         
@@ -105,7 +124,7 @@ package body max11115_generic_pkg is
         end if;
 
         if self.is_ready then
-            self.ad_conversion <= '0' & self.shift_register(17 downto 3);
+            self.ad_conversion <= fetch_adc(self.shift_register,offset);
         end if;
 
         if get_clock_counter(self.data_capture_counter) = 1 and self.state = 1 then

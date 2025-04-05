@@ -27,5 +27,7 @@ lib.add_source_files(ROOT / "testbenches/spiadc/max11115_tb.vhd")
 
 lib.add_source_files(ROOT / "testbenches/spi_communication/spi_master_tb.vhd")
 
+lib.add_source_files(ROOT / "testbenches/spiadc/adc121s101_tb.vhd")
+
 VU.set_sim_option("nvc.sim_flags", ["-w"])
 VU.main()

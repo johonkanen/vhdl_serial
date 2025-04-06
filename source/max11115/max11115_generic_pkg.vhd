@@ -6,7 +6,6 @@ package max11115_generic_pkg is
     generic(
             idle_state_number : natural := 0
             ;g_count_max : natural range 0 to 127 := 3
-            ;g_buffer_offset : natural range 0 to 15 := 3
         );
 
     package max11115_clkdiv_pkg is new work.clock_divider_generic_pkg generic map(g_count_max => g_count_max);
@@ -31,7 +30,7 @@ package max11115_generic_pkg is
         serial_io   : in std_logic;
         signal cs   : out std_logic;
         signal spi_clock_out : out std_logic
-        ;offset : in natural := g_buffer_offset);
+        ;offset : in natural := 3);
 
     ----------------------------------------------
     procedure request_conversion (
@@ -91,7 +90,7 @@ package body max11115_generic_pkg is
         ;serial_io   : in std_logic
         ;signal cs   : out std_logic
         ;signal spi_clock_out : out std_logic
-        ;offset : in natural := g_buffer_offset
+        ;offset : in natural := 3
     ) is
     begin
         
@@ -107,6 +106,7 @@ package body max11115_generic_pkg is
         if self.data_capture_delay < 4 then
             self.data_capture_delay <= self.data_capture_delay + 1;
         end if;
+
         if self.data_capture_delay = 3 then
             request_number_of_clock_pulses(self.data_capture_counter, 16);
         end if;
